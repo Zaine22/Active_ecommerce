@@ -17,4 +17,4 @@ updates/
 composer.lock
 *.lock
 resources/lang/en.json
-.well-known
+/.well-known
