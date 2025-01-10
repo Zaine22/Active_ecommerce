@@ -11,7 +11,7 @@
                         <img src="{{ uploaded_asset(get_setting('seller_register_page_image')) }}" alt="" class="img-fit h-100">
                     </div>
                 </div>
-                
+
                 <!-- Right Side -->
                 <div class="col-xxl-6 col-lg-5">
                     <div class="right-content">
@@ -81,7 +81,7 @@
 
 
                                             <div class="fs-15 fw-600 py-2">{{ translate('Basic Info')}}</div>
-                                            
+
                                             <div class="form-group">
                                                 <label for="shop_name" class="fs-12 fw-700 text-soft-dark">{{  translate('Shop Name') }}</label>
                                                 <input type="text" class="form-control rounded-0{{ $errors->has('shop_name') ? ' is-invalid' : '' }}" value="{{ old('shop_name') }}" placeholder="{{  translate('Shop Name') }}" name="shop_name" required>
@@ -103,6 +103,7 @@
                                             </div>
 
                                             <!-- Recaptcha -->
+
                                             @if(get_setting('google_recaptcha') == 1)
                                                 <div class="form-group">
                                                     <div class="g-recaptcha" data-sitekey="{{ env('CAPTCHA_KEY') }}"></div>
@@ -113,7 +114,7 @@
                                                     </span>
                                                 @endif
                                             @endif
-                                        
+
                                             <!-- Submit Button -->
                                             <div class="mb-4 mt-4">
                                                 <button type="submit" class="btn btn-primary btn-block fw-600 rounded-0">{{  translate('Register Your Shop') }}</button>

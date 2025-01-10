@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Shop;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Shop;
+use App\Models\User;
 use App\Models\Wishlist;
-use Illuminate\Support\Facades\Hash;
 use App\Notifications\ShopVerificationNotification;
 use App\Utility\EmailUtility;
 use Cache;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 
 class SellerController extends Controller
@@ -40,22 +40,22 @@ class SellerController extends Controller
     {
         $sort_search = $request->search ?? null;
         $approved = $request->approved_status ?? null;
-        $verification_status =  $request->verification_status ?? null;
+        $verification_status = $request->verification_status ?? null;
 
         $shops = Shop::whereIn('user_id', function ($query) {
-                    $query->select('id')
-                    ->from(with(new User)->getTable())
-                    ->where('user_type', 'seller');
-                })->latest();
+            $query->select('id')
+                ->from(with(new User)->getTable())
+                ->where('user_type', 'seller');
+        })->latest();
 
         if ($sort_search != null || $verification_status != null) {
             $user_ids = User::where('user_type', 'seller');
-            if($sort_search != null){
+            if ($sort_search != null) {
                 $user_ids = $user_ids->where(function ($user) use ($sort_search) {
                     $user->where('name', 'like', '%' . $sort_search . '%')->orWhere('email', 'like', '%' . $sort_search . '%');
                 });
             }
-            if($verification_status != null){
+            if ($verification_status != null) {
                 $user_ids = $verification_status == 'verified' ? $user_ids->where('email_verified_at', '!=', null) : $user_ids->where('email_verified_at', null);
             }
             $user_ids = $user_ids->pluck('id')->toArray();
@@ -88,22 +88,23 @@ class SellerController extends Controller
      */
     public function store(Request $request)
     {
+        dd($request);
+
         $request->validate([
             'name' => 'required|max:255',
             'email' => 'required|email|unique:users',
             'shop_name' => 'max:200',
             'address' => 'max:500',
         ],
-        [
-            'name.required' => translate('Name is required'),
-            'name.max' => translate('Max 255 Character'),
-            'email.required' => translate('Email is required'),
-            'email.email' => translate('Email must be a valid email address'),
-            'email.unique' => translate('An user exists with this email'),
-            'shop_name.max' => translate('Max 200 Character'),
-            'address.max' => translate('Max 255 Character'),
-        ]);
-
+            [
+                'name.required' => translate('Name is required'),
+                'name.max' => translate('Max 255 Character'),
+                'email.required' => translate('Email is required'),
+                'email.email' => translate('Email must be a valid email address'),
+                'email.unique' => translate('An user exists with this email'),
+                'shop_name.max' => translate('Max 200 Character'),
+                'address.max' => translate('Max 255 Character'),
+            ]);
 
         if (User::where('email', $request->email)->first() != null) {
             flash(translate('Email already exists!'))->error();
@@ -111,22 +112,22 @@ class SellerController extends Controller
         }
         $password = substr(hash('sha512', rand()), 0, 8);
 
-        $user           = new User;
-        $user->name     = $request->name;
-        $user->email    = $request->email;
-        $user->user_type= "seller";
+        $user = new User;
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->user_type = "seller";
         $user->password = Hash::make($password);
 
         if ($user->save()) {
-            $shop           = new Shop;
-            $shop->user_id  = $user->id;
-            $shop->name     = $request->shop_name;
-            $shop->address  = $request->address;
-            $shop->slug     = 'demo-shop-' . $user->id;
+            $shop = new Shop;
+            $shop->user_id = $user->id;
+            $shop->name = $request->shop_name;
+            $shop->address = $request->address;
+            $shop->slug = 'demo-shop-' . $user->id;
             $shop->save();
 
             try {
-                EmailUtility::selelr_registration_email('registration_from_system_email_to_seller', $user, $password);
+                EmailUtility::seller_registration_email('registration_from_system_email_to_seller', $user, $password);
             } catch (\Exception $e) {
                 $shop->delete();
                 $user->delete();
@@ -145,7 +146,7 @@ class SellerController extends Controller
             // Seller Account Opening Email to Admin
             if ((get_email_template_data('seller_reg_email_to_admin', 'status') == 1)) {
                 try {
-                    EmailUtility::selelr_registration_email('seller_reg_email_to_admin', $user, null);
+                    EmailUtility::seller_registration_email('seller_reg_email_to_admin', $user, null);
                 } catch (\Exception $e) {}
             }
 
@@ -219,7 +220,7 @@ class SellerController extends Controller
 
         // Seller Product and product related data delete
         $products = $shop->user->products;
-        foreach($products as $product){
+        foreach ($products as $product) {
             $product_id = $product->id;
             $product->product_translations()->delete();
             $product->categories()->detach();
@@ -306,7 +307,6 @@ class SellerController extends Controller
         return redirect()->route('sellers.index');
     }
 
-
     public function payment_modal(Request $request)
     {
         $shop = shop::findOrFail($request->id);
@@ -331,9 +331,9 @@ class SellerController extends Controller
         $data = array();
         $data['shop'] = $shop;
         $data['status'] = $status;
-        $data['notification_type_id'] = $status == 'approved' ? 
-                                        get_notification_type('shop_verify_request_approved', 'type')->id : 
-                                        get_notification_type('shop_verify_request_rejected', 'type')->id;
+        $data['notification_type_id'] = $status == 'approved' ?
+        get_notification_type('shop_verify_request_approved', 'type')->id :
+        get_notification_type('shop_verify_request_rejected', 'type')->id;
 
         Notification::send($users, new ShopVerificationNotification($data));
         return 1;
@@ -342,7 +342,7 @@ class SellerController extends Controller
     public function login($id)
     {
         $shop = Shop::findOrFail(decrypt($id));
-        $user  = $shop->user;
+        $user = $shop->user;
         auth()->login($user, true);
 
         return redirect()->route('seller.dashboard');
@@ -369,23 +369,24 @@ class SellerController extends Controller
     }
 
     // Seller Based Commission
-    public function setSellerBasedCommission(Request $request){
-        if($request->seller_ids != null){
-            foreach (explode(",",$request->seller_ids) as $shop) {
+    public function setSellerBasedCommission(Request $request)
+    {
+        if ($request->seller_ids != null) {
+            foreach (explode(",", $request->seller_ids) as $shop) {
                 $shop = Shop::where('id', $shop)->first();
                 $shop->commission_percentage = $request->commission_percentage;
                 $shop->save();
             }
             flash(translate('Seller commission is added successfully.'))->success();
-        }
-        else{
+        } else {
             flash(translate('Something went wrong!.'))->warning();
         }
         return back();
     }
 
     // Edit Seller Custom Followers
-    public function editSellerCustomFollowers(Request $request) {
+    public function editSellerCustomFollowers(Request $request)
+    {
         $shop = Shop::where('id', $request->shop_id)->first();
         $shop->custom_followers = $request->custom_followers;
         $shop->save();

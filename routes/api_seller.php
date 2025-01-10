@@ -78,7 +78,7 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
         });
         // Digital Product Section
         Route::controller(DigitalProductController::class)->group(function () {
-            Route::get('digital-products', 'index'); 
+            Route::get('digital-products', 'index');
             Route::get('digital-products/categories', 'getCategory');
             Route::post('digital-products/store', 'store');
             Route::get('digital-products/edit/{id}', 'edit');
@@ -120,21 +120,21 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
             Route::get('coupon/for-product', 'coupon_for_product');
         });
 
-        //Conversations 
+        //Conversations
         Route::controller(ConversationController::class)->group(function () {
             Route::get('conversations', 'index');
             Route::get('conversations/show/{id}', 'showMessages');
             Route::post('conversations/message/store', 'send_message_to_customer');
         });
 
-        //Seller Package 
+        //Seller Package
         Route::controller(SellerPackageController::class)->group(function () {
             Route::get('seller-packages-list', 'seller_packages_list');
             Route::post('seller-package/offline-payment', 'purchase_package_offline');
             Route::post('seller-package/free-package', 'purchase_free_package');
         });
 
-        //Seller File Upload 
+        //Seller File Upload
         Route::controller(SellerFileUploadController::class)->group(function () {
             Route::post('file/upload', 'upload');
             Route::get('file/all', 'index');
@@ -157,10 +157,10 @@ Route::group(['prefix' => 'v2/seller', 'middleware' => ['app_language']], functi
             Route::post('pos/user-cart-data', 'getUserCartData');
             Route::get('pos/configuration', 'posConfiguration');
             Route::post('pos/configuration/update', 'posConfigurationUpdate');
-            
+
         });
 
     });
 
-    // Route::post('shops/create', [ShopController::class, 'store']);
+    Route::post('shops/create', [ShopController::class, 'store']);
 });

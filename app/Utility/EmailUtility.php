@@ -29,7 +29,7 @@ class EmailUtility
         $emailBody = str_replace('[[email/phone]]', $email_or_phone, $emailBody);
         $emailBody = str_replace('[[date]]', date('d-m-Y', strtotime($user->created_at)), $emailBody);
         $emailBody = str_replace('[[admin_email]]', $admin->email, $emailBody);
-        
+
         $array['subject'] = $emailSubject;
         $array['content'] = $emailBody;
 
@@ -37,7 +37,7 @@ class EmailUtility
     }
 
     // Seller registration email to Admin & Seller
-    public static function selelr_registration_email($emailIdentifier, $user, $password = null){
+    public static function seller_registration_email($emailIdentifier, $user, $password = null){
         $admin = get_admin();
         $shop = $user->shop;
         $emailSendTo = $emailIdentifier == 'seller_reg_email_to_admin' ? $admin->email : $user->email;
@@ -69,12 +69,12 @@ class EmailUtility
         foreach($emailIdentifiers as $emailIdentifier){
             $emailTemplate = EmailTemplate::whereIdentifier($emailIdentifier)->first();
             if($emailTemplate != null && $emailTemplate->status == 1){
-                
+
                 $emailSendTo = $emailTemplate->receiver == 'admin' ? $admin->email : $user->email;
 
                 $emailSubject = $emailTemplate->subject;
                 $emailSubject = str_replace('[[store_name]]', get_setting('site_name'), $emailSubject);
-    
+
                 $emailBody = $emailTemplate->default_text;
                 $emailBody = str_replace('[[admin_name]]', $admin->name, $emailBody);
                 $emailBody = str_replace('[[store_name]]', get_setting('site_name'), $emailBody);
@@ -85,17 +85,17 @@ class EmailUtility
                 $emailBody = str_replace('[[delivery_boy_country]]', $user->country, $emailBody);
                 $emailBody = str_replace('[[date]]', date('d-m-Y', strtotime($user->created_at)), $emailBody);
                 $emailBody = str_replace('[[admin_email]]', get_admin()->email, $emailBody);
-    
+
                 $array['subject'] = $emailSubject;
                 $array['content'] = $emailBody;
-                
+
                 try {
                     Mail::to($emailSendTo)->queue(new MailManager($array));
                 } catch (\Exception $e) {}
             }
         }
     }
- 
+
     // Order delivery and payment status change Email
     public static function order_email($order, $status){
         $admin = get_admin();
@@ -108,7 +108,7 @@ class EmailUtility
         }
         $users = User::findMany($userIds);
 
-        foreach($users as $user){ 
+        foreach($users as $user){
             $emailIdentifier = 'order_'.$status.'_email_to_'.$user->user_type;
             $emailTemplate = EmailTemplate::whereIdentifier($emailIdentifier)->first();
 
@@ -116,7 +116,7 @@ class EmailUtility
                 $shopName = $user->user_type == 'seller' ? $user->shop->name : null;
                 $emailSubject = $emailTemplate->subject;
                 $emailSubject = str_replace('[[order_code]]', $order->code, $emailSubject);
-    
+
                 $emailBody = $emailTemplate->default_text;
                 $emailBody = str_replace('[[store_name]]', get_setting('site_name'), $emailBody);
                 $emailBody = str_replace('[[shop_name]]', $shopName, $emailBody);
@@ -127,15 +127,15 @@ class EmailUtility
                 $emailBody = str_replace('[[delivery_date]]', date('d-m-Y'), $emailBody);
                 $emailBody = str_replace('[[order_amount]]', single_price($order->grand_total), $emailBody);
                 $emailBody = str_replace('[[admin_email]]', $admin->email, $emailBody);
-                
+
                 $array['subject'] = $emailSubject;
                 $array['content'] = $emailBody;
-    
+
                 try {
                     Mail::to($user->email)->queue(new MailManager($array));
                 } catch (\Exception $e) {}
-            }   
-        }  
+            }
+        }
     }
 
     // User Email Verification
@@ -151,13 +151,13 @@ class EmailUtility
 
         $emailSubject = $emailTemplate->subject;
         $emailSubject = str_replace('[[store_name]]', get_setting('site_name'), $emailSubject);
-        
+
         $emailBody = $emailTemplate->default_text;
         $link = route('email.verification.confirmation', $verification_code);
         $verifyButton = '<div style="display: flex; justify-content: center; padding-bottom:4px;">
             <a href="'.$link.'" target="_blank" style="background: #0b60bd; text-decoration:none; padding: 1.4rem 2rem; color:#fff;border-radius: .3rem;">Click here</a>
         </div>';
-        
+
         $emailBody = str_replace('[[store_name]]', get_setting('site_name'), $emailBody);
         $emailBody = str_replace('[[customer_name]]', $user->name, $emailBody);
         $emailBody = str_replace('[[seller_name]]', $user->name, $emailBody);
@@ -201,7 +201,7 @@ class EmailUtility
                     Mail::to($emailSendTo)->queue(new MailManager($array));
                 } catch (\Exception $e) {}
             }
-        
+
         }
     }
 
@@ -217,7 +217,7 @@ class EmailUtility
         foreach($emailIdentifiers as $emailIdentifier){
             $emailTemplate = EmailTemplate::whereIdentifier($emailIdentifier)->first();
             if($emailTemplate != null && $emailTemplate->status == 1){
-                
+
                 if($emailTemplate->receiver == 'admin'){
                     $emailSendTo = $admin->email;
                 }
@@ -230,7 +230,7 @@ class EmailUtility
                 $emailSubject = $emailTemplate->subject;
                 $emailSubject = str_replace('[[order_code]]', $order->code, $emailSubject);
                 $emailSubject = str_replace('[[shop_name]]', $shopName, $emailSubject);
-    
+
                 $emailBody = $emailTemplate->default_text;
                 $emailBody = str_replace('[[admin_name]]', $admin->name, $emailBody);
                 $emailBody = str_replace('[[store_name]]', get_setting('site_name'), $emailBody);
@@ -244,10 +244,10 @@ class EmailUtility
                 $emailBody = str_replace('[[refund_amount]]', single_price($refundReqest->refund_amount), $emailBody);
                 $emailBody = str_replace('[[processes_date]]', date('d-m-Y'), $emailBody);
                 $emailBody = str_replace('[[admin_email]]', get_admin()->email, $emailBody);
-    
+
                 $array['subject'] = $emailSubject;
                 $array['content'] = $emailBody;
-                
+
                 try {
                     Mail::to($emailSendTo)->queue(new MailManager($array));
                 } catch (\Exception $e) {}

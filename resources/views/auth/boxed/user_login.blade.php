@@ -31,7 +31,7 @@
                                     <div class="">
                                         <form class="form-default loginForm" role="form" action="{{ route('login') }}" method="POST">
                                             @csrf
-                                            
+
                                             <!-- Email or Phone -->
                                             @if (addon_is_activated('otp_system'))
                                                 <div class="form-group phone-form-group mb-1">
@@ -40,7 +40,7 @@
                                                 </div>
 
                                                 <input type="hidden" name="country_code" value="">
-                                                
+
                                                 <div class="form-group email-form-group mb-1 d-none">
                                                     <label for="email" class="fs-12 fw-700 text-soft-dark">{{  translate('Email') }}</label>
                                                     <input type="email" class="form-control rounded-0 {{ $errors->has('email') ? ' is-invalid' : '' }}" value="{{ old('email') }}" placeholder="{{  translate('johndoe@example.com') }}" name="email" id="email" autocomplete="off">
@@ -50,7 +50,7 @@
                                                         </span>
                                                     @endif
                                                 </div>
-                                                
+
                                                 <div class="form-group text-right">
                                                     <button class="btn btn-link p-0 text-primary fs-12 fw-400" type="button" onclick="toggleEmailPhone(this)"><i>*{{ translate('Use Email Instead') }}</i></button>
                                                 </div>
@@ -65,7 +65,7 @@
                                                     @endif
                                                 </div>
                                             @endif
-                                            
+
                                             <div class="password-login-block">
                                                 <!-- password -->
                                                 <div class="form-group">
@@ -117,7 +117,7 @@
                                             </div>
                                         @endif
 
-                                        <!-- Social Login -->
+                                        <!-- authentication_layout_select -->
                                         @if(get_setting('google_login') == 1 || get_setting('facebook_login') == 1 || get_setting('twitter_login') == 1 || get_setting('apple_login') == 1)
                                             <div class="text-center mb-3">
                                                 <span class="bg-white fs-12 text-gray">{{ translate('Or Login With')}}</span>
