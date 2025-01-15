@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Upload;
-use Response;
 use Auth;
-use Storage;
-use Image;
 use enshrined\svgSanitize\Sanitizer;
+use Illuminate\Http\Request;
+use Image;
+use Response;
+use Storage;
 use Str;
 
 class AizUploadController extends Controller
@@ -17,6 +17,8 @@ class AizUploadController extends Controller
     {
 
         $all_uploads = (auth()->user()->user_type == 'seller') ? Upload::where('user_id', auth()->user()->id) : Upload::query();
+
+        dd($all_uploads);
         $search = null;
         $sort_by = null;
 
@@ -46,24 +48,22 @@ class AizUploadController extends Controller
 
         $all_uploads = $all_uploads->paginate(60)->appends(request()->query());
 
-
         return (auth()->user()->user_type == 'seller')
-            ? view('seller.uploads.index', compact('all_uploads', 'search', 'sort_by'))
-            : view('backend.uploaded_files.index', compact('all_uploads', 'search', 'sort_by'));
+        ? view('seller.uploads.index', compact('all_uploads', 'search', 'sort_by'))
+        : view('backend.uploaded_files.index', compact('all_uploads', 'search', 'sort_by'));
     }
 
     public function create()
     {
-        if(env('DEMO_MODE') == 'On'){
+        if (env('DEMO_MODE') == 'On') {
             flash(translate('Data can not change in demo mode.'))->info();
             return back();
         }
 
         return (auth()->user()->user_type == 'seller')
-            ? view('seller.uploads.create')
-            : view('backend.uploaded_files.create');
+        ? view('seller.uploads.create')
+        : view('backend.uploaded_files.create');
     }
-
 
     public function show_uploader(Request $request)
     {
@@ -105,7 +105,7 @@ class AizUploadController extends Controller
             "ods" => "document",
             "xlr" => "document",
             "xls" => "document",
-            "xlsx" => "document"
+            "xlsx" => "document",
         );
 
         if ($request->hasFile('aiz_file')) {
@@ -150,7 +150,7 @@ class AizUploadController extends Controller
                         $extension = get_setting('uploaded_image_format');
                     }
                     try {
-                        $path = 'uploads/all/'. Str::random(40) . '.' .$extension;
+                        $path = 'uploads/all/' . Str::random(40) . '.' . $extension;
                         $img = Image::make($request->file('aiz_file')->getRealPath())->encode($extension, 75);
                         $height = $img->height();
                         $width = $img->width();
@@ -160,14 +160,14 @@ class AizUploadController extends Controller
                             $watermark_position = get_setting('watermark_position', 'top-left');
                             // watermark Image
                             if (get_setting('image_watermark_type') == "image") {
-                                $watermarkImg = Image::make( uploaded_asset(get_setting('watermark_image')) );
-                                if ($width > $height ) {
-                                    $wmarkHeight = $height/2;
+                                $watermarkImg = Image::make(uploaded_asset(get_setting('watermark_image')));
+                                if ($width > $height) {
+                                    $wmarkHeight = $height / 2;
                                     $watermarkImg->resize(null, $wmarkHeight, function ($constraint) {
                                         $constraint->aspectRatio();
                                     });
                                 } else {
-                                    $wmarkWidth = $width/2;
+                                    $wmarkWidth = $width / 2;
                                     $watermarkImg->resize(null, $wmarkWidth, function ($constraint) {
                                         $constraint->aspectRatio();
                                     });
@@ -194,20 +194,20 @@ class AizUploadController extends Controller
                                 //     }
                                 // }
 
-                            // watermark Text
+                                // watermark Text
                             } elseif (get_setting('image_watermark_type') == "text") {
                                 if ($watermark_position == 'center') {
                                     $valign = 'middle';
                                     $align = 'center';
-                                    $x = round($width/2);
-                                    $y =  round($height/2);
+                                    $x = round($width / 2);
+                                    $y = round($height / 2);
                                 } else {
                                     $valign = explode('-', $watermark_position)[0];
                                     $align = explode('-', $watermark_position)[1];
                                     $x = ($align == 'right') ? ($width - 20) : 20;
-                                    $y =  ($valign == 'bottom') ? ($height - 20) : 20;
+                                    $y = ($valign == 'bottom') ? ($height - 20) : 20;
                                 }
-                                $img->text(get_setting('watermark_text', 'Watermark Text Here'), $x, $y, function($font) use ($valign, $align) {
+                                $img->text(get_setting('watermark_text', 'Watermark Text Here'), $x, $y, function ($font) use ($valign, $align) {
                                     $font->file(base_path('public/assets/fonts/robotoMedium.ttf'));
                                     $font->size(get_setting('watermark_text_size', 20));
                                     $font->color(get_setting('watermark_text_color', '#e1e1e1'));
@@ -236,7 +236,7 @@ class AizUploadController extends Controller
                     } catch (\Exception $e) {
                         //dd($e);
                     }
-                }else{
+                } else {
                     $path = $request->file('aiz_file')->store('uploads/all', 'local');
                 }
 
@@ -251,7 +251,7 @@ class AizUploadController extends Controller
                         file_get_contents(base_path('public/') . $path),
                         [
                             'visibility' => 'public',
-                            'ContentType' =>  $extension == 'svg' ? 'image/svg+xml' : $file_mime
+                            'ContentType' => $extension == 'svg' ? 'image/svg+xml' : $file_mime,
                         ]
                     );
 
@@ -274,6 +274,7 @@ class AizUploadController extends Controller
     public function get_uploaded_files(Request $request)
     {
         $uploads = Upload::where('user_id', Auth::user()->id);
+
         if ($request->search != null) {
             $uploads->where('file_original_name', 'like', '%' . $request->search . '%');
         }
@@ -398,7 +399,7 @@ class AizUploadController extends Controller
         $file = Upload::findOrFail($request['id']);
 
         return (auth()->user()->user_type == 'seller')
-            ? view('seller.uploads.info', compact('file'))
-            : view('backend.uploaded_files.info', compact('file'));
+        ? view('seller.uploads.info', compact('file'))
+        : view('backend.uploaded_files.info', compact('file'));
     }
 }

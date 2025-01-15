@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\Cart;
-use App\Models\User;
-use App\Utility\EmailUtility;
-use CoreComponentRepository;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Session;
+use GeneaLabs\LaravelSocialiter\Facades\Socialiter;
 use Socialite;
+use App\Models\User;
+use App\Models\Customer;
+use App\Models\Cart;
+use App\Services\SocialRevoke;
+use App\Utility\EmailUtility;
+use Session;
+use Illuminate\Http\Request;
+use CoreComponentRepository;
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
 use Storage;
 
 class LoginController extends Controller
@@ -25,7 +29,7 @@ class LoginController extends Controller
     | redirecting them to your home screen. The controller uses a trait
     | to conveniently provide its functionality to your applications.
     |
-     */
+    */
 
     use AuthenticatesUsers;
 
@@ -35,6 +39,7 @@ class LoginController extends Controller
      * @var string
      */
     /*protected $redirectTo = '/';*/
+
 
     /**
      * Redirect the user to the Google authentication page.
@@ -77,7 +82,7 @@ class LoginController extends Controller
         } else {
             //check if email exist
             $existing_or_new_user = User::firstOrNew([
-                'email' => $user->email,
+                'email' => $user->email
             ]);
             $existing_or_new_user->provider_id = $user->id;
             $existing_or_new_user->access_token = $user->token;
@@ -101,7 +106,7 @@ class LoginController extends Controller
             Cart::where('temp_user_id', session('temp_user_id'))
                 ->update([
                     'user_id' => auth()->user()->id,
-                    'temp_user_id' => null,
+                    'temp_user_id' => null
                 ]);
 
             Session::forget('temp_user_id');
@@ -188,7 +193,7 @@ class LoginController extends Controller
             Cart::where('temp_user_id', session('temp_user_id'))
                 ->update([
                     'user_id' => auth()->user()->id,
-                    'temp_user_id' => null,
+                    'temp_user_id' => null
                 ]);
 
             Session::forget('temp_user_id');
@@ -214,7 +219,7 @@ class LoginController extends Controller
         }
         return response()->json([
             'result' => $result,
-            'provider' => $return_provider,
+            'provider' => $return_provider
         ]);
     }
 
@@ -229,8 +234,8 @@ class LoginController extends Controller
     protected function validateLogin(Request $request)
     {
         $request->validate([
-            'email' => 'required_without:phone',
-            'phone' => 'required_without:email',
+            'email'    => 'required_without:phone',
+            'phone'    => 'required_without:email',
             'password' => 'required|string',
         ]);
     }
@@ -257,15 +262,16 @@ class LoginController extends Controller
     public function authenticated()
     {
         if (session('temp_user_id') != null) {
-            if (auth()->user()->user_type == 'customer') {
+            if(auth()->user()->user_type == 'customer'){
                 Cart::where('temp_user_id', session('temp_user_id'))
-                    ->update(
-                        [
-                            'user_id' => auth()->user()->id,
-                            'temp_user_id' => null,
-                        ]
-                    );
-            } else {
+                ->update(
+                    [
+                        'user_id' => auth()->user()->id,
+                        'temp_user_id' => null
+                    ]
+                );
+            }
+            else {
                 Cart::where('temp_user_id', session('temp_user_id'))->delete();
             }
             Session::forget('temp_user_id');
@@ -386,10 +392,5 @@ class LoginController extends Controller
     public function handle_demo_login()
     {
         return view('frontend.handle_demo_login');
-    }
-
-    public function tiktoklogin()
-    {
-        dd("hello");
     }
 }
